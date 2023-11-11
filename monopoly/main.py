@@ -1,11 +1,12 @@
 # Note: we did not end up using all of them because we do not have enough information
 # about the players and where they landed
+
 # useful rules: 
 # if you land on a property, you can buy it if you have enough money
 # if you land on a property owned by someone else, you pay rent
 # if you land on a property owned by yourself, you do nothing
 # if you land on a property owned by the bank, you can buy it if you have enough money
-# every time you pass Go you get 200 from the bank
+# every time you pass Go you get 200$ from the bank
 
 # there are 40 boxes on the board
 # 28 properties
@@ -17,6 +18,10 @@
 # 1 free parking
 # 1 go to jail
 
+# Used the following links:
+# https://www.hasbro.com/common/instruct/00009.pdf
+# https://monopolyguide.com/traditional/monopoly-list-of-community-chest-cards-main-version/
+# https://monopolyguide.com/traditional/monopoly-list-of-chance-cards-main-version/
 
 import os
 
@@ -90,30 +95,33 @@ def calculate_rounds(player):
         return 0
     current_position = players[player]['end_position']
     rounds = 0
+    # if the next property is smaller than the previous one, it means we went around the board
     for i in range(1, len(properties)):
-        # if the next property is smaller than the previous one, it means we went around the board
         if properties[i] < properties[i - 1]: 
             rounds += 1
     # if the current position is smaller than the biggest property, it means we went around the board
     if current_position < max(properties): 
         rounds += 1
-    if current_position < min(properties): # if the current position is smaller than the smallest property, it means we went around the board
+    # if the current position is smaller than the smallest property, it means we went around the board
+    if current_position < min(properties): 
         rounds += 1    
     return rounds
 
 
-# calculate the starting budget of each player
+# calculate the estimated starting budget
 def calculate_starting_budgets():
     min_starting_budget = 0
     for player in players.keys():
         rounds = calculate_rounds(player)
         players[player]['starting_budget'] = players[player]['end_budget'] + players[player]['cost'] - rounds * 200
 
-    min_starting_budget = min(players[player]['starting_budget'] for player in players.keys())
+    # find the minimum starting budget and substract 100$ to compensate for chance and community chest
+    min_starting_budget = min(players[player]['starting_budget'] for player in players.keys())-100
 
-    if min_starting_budget < 500: # if the minimum starting budget is less than 500, we set it to 500
+    if min_starting_budget < 500: 
         min_starting_budget = 500
-    elif min_starting_budget > 2500: # if the minimum starting budget is more than 2500, we set it to 2500
+
+    elif min_starting_budget > 2500:
         min_starting_budget = 2500
     return min_starting_budget
 
