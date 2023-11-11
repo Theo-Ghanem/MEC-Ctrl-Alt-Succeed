@@ -18,7 +18,7 @@
 # 1 luxury tax
 # 1 income tax
 # 1 jail
-# 1 free parling
+# 1 free parking
 # 1 go to jail
 
 # TODO mortgage
@@ -27,8 +27,6 @@
 
 
 
-
-starting_budgets = [] # answer: txt file with list of starting budgets (1 integer per line, A,B,C,D)
 properties_A = [] # list with properties owned by A
 properties_B = [] # list with properties owned by B
 properties_C = [] # list with properties owned by C
@@ -45,10 +43,6 @@ current_position_C = 0 # current position of C
 current_position_D = 0 # current position of D
 
 #set starting budget to 500 (it's the minimum)
-starting_budget_A = 500 # starting budget of A
-starting_budget_B = 500 # starting budget of B
-starting_budget_C = 500 # starting budget of C
-starting_budget_D = 500 # starting budget of D
 starting_budget_Players = 500
 
 budget_round_5_A = 0 # budget of A at the end of round 5
@@ -135,17 +129,10 @@ def readInput(index):
                     current_position_D = current_position
                     budget_round_5_D = int(parts[1])
 
-def update_budgets(A, B, C, D):
-    global starting_budget_A, starting_budget_B, starting_budget_C, starting_budget_D
-    starting_budget_A += A
-    starting_budget_B += B
-    starting_budget_C += C
-    starting_budget_D += D
-
 
 
 # find the number of times each player has gone around the board to see if they got +200$
-def calculate_rounds_and_add_bonus(properties, current_position):
+def calculate_rounds(properties, current_position):
     properties.sort()
     rounds = 0
     for i in range(1, len(properties)):
@@ -154,9 +141,26 @@ def calculate_rounds_and_add_bonus(properties, current_position):
     if current_position < max(properties): # if the current position is smaller than the biggest property, it means we went around the board
         rounds += 1
     if current_position < min(properties): # if the current position is smaller than the smallest property, it means we went around the board
-        rounds += 1
-    update_budgets(rounds * 200, rounds * 200, rounds * 200, rounds * 200)    
+        rounds += 1    
     return rounds
+
+def calculate_starting_budgets():
+    rounds_A = calculate_rounds(properties_A, current_position_A)
+    rounds_B = calculate_rounds(properties_B, current_position_B)
+    rounds_C = calculate_rounds(properties_C, current_position_C)
+    rounds_D = calculate_rounds(properties_D, current_position_D)
+    moneyA = budget_round_5_A+cost_properties_A-rounds_A*200
+    moneyB = budget_round_5_B+cost_properties_B-rounds_B*200
+    moneyC = budget_round_5_C+cost_properties_C-rounds_C*200
+    moneyD = budget_round_5_D+cost_properties_D-rounds_D*200
+    print("Amount A started with: ", moneyA)
+    print("Amount B started with: ", moneyB)
+    print("Amount C started with: ", moneyC)
+    print("Amount D started with: ", moneyD)
+    min_starting_budget = min(moneyA, moneyB, moneyC, moneyD)
+
+    if min_starting_budget <500:
+        min_starting_budget=500
 
 def print_properties_owned_by_each_player():
     print("Properties owned by A:", properties_A)
@@ -169,10 +173,10 @@ def print_current_position_of_each_player():
     print("Current position of C:", current_position_C)
     print("Current position of D:", current_position_D)
 def print_rounds_of_each_player():
-    rounds_A = calculate_rounds_and_add_bonus(properties_A, current_position_A)
-    rounds_B = calculate_rounds_and_add_bonus(properties_B, current_position_B)
-    rounds_C = calculate_rounds_and_add_bonus(properties_C, current_position_C)
-    rounds_D = calculate_rounds_and_add_bonus(properties_D, current_position_D)
+    rounds_A = calculate_rounds(properties_A, current_position_A)
+    rounds_B = calculate_rounds(properties_B, current_position_B)
+    rounds_C = calculate_rounds(properties_C, current_position_C)
+    rounds_D = calculate_rounds(properties_D, current_position_D)
     print("Player A has gone around the board", rounds_A, "times")
     print("Player B has gone around the board", rounds_B, "times")
     print("Player C has gone around the board", rounds_C, "times")
@@ -187,15 +191,21 @@ def print_budgets_after_round_5():
     print("Budget of B after round 5:", budget_round_5_B)
     print("Budget of C after round 5:", budget_round_5_C)
     print("Budget of D after round 5:", budget_round_5_D)
+    
+
+
 def main():
-    readInput(0)
-    # print_properties_owned_by_each_player()
-    # print_current_position_of_each_player()
-    # print_rounds_of_each_player()
-    print_budgets_after_round_5()
-    print_cost_of_properties_owned_by_each_player()
-    # with open('monopoly\out.txt', 'w') as f:
-    #    f.write(str(starting_budget_Players) + '\n')
+    # for i in range(0, 32):
+        readInput(0)
+        print_properties_owned_by_each_player()
+        print_current_position_of_each_player()
+        print_rounds_of_each_player()
+        print_budgets_after_round_5()
+        print_cost_of_properties_owned_by_each_player()
+        calculate_starting_budgets()
+        print("----------------------------------------------------")
+        # with open('monopoly\out.txt', 'w') as f:
+        #    f.write(str(starting_budget_Players) + '\n')
 
 if __name__ == "__main__":
     main()
