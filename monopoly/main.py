@@ -88,13 +88,15 @@ def calculate_rounds(player):
     properties = players[player]['properties']
     if not properties:  # if the player has no properties return 0 ( we assume they havent gone around the board)
         return 0
-    properties.sort()
+    # properties.sort()
     current_position = players[player]['end_position']
     rounds = 0
     for i in range(1, len(properties)):
-        if properties[i] < properties[i - 1]: # if the next property is smaller than the previous one, it means we went around the board
+        # if the next property is smaller than the previous one, it means we went around the board
+        if properties[i] < properties[i - 1]: 
             rounds += 1
-    if current_position < max(properties): # if the current position is smaller than the biggest property, it means we went around the board
+    # if the current position is smaller than the biggest property, it means we went around the board
+    if current_position < max(properties): 
         rounds += 1
     if current_position < min(properties): # if the current position is smaller than the smallest property, it means we went around the board
         rounds += 1    
