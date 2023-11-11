@@ -29,7 +29,7 @@ def create_hexcqi_lut():
 
 
 def get_input_file():
-    return open('in.txt', 'r')
+    return open('in.txt', 'r', encoding='utf-8')
 
 
 def parse_line(input_line: str):
@@ -53,19 +53,25 @@ def parse_hex_cqi(input: str):
     """
     parse hex cqi into binary value
     """
-    print(f'Hex CQI Input:\n{input}')
+    print(f'Hex CQI Input:\n{input}') if verbose else None
     output = np.array([])
     input = iter(input)
     for char in input:
         if char == '\n':
             continue
-        if char == 'C' or char == 'Q':  # CQI value - skip next two chars (Q, I) and read next char
+        if char == 'C':  # CQI value - skip next two chars (Q, I) and read next char
             next(input)
             next(input)
             nxt = next(input)
-            char = f'CQI{nxt}' if nxt != 'C' and nxt != 'Q' and nxt != '\n' else 'CQI'
+            if nxt == 'C' or nxt == 'Q' or nxt == 'I': # manually add a repeated CQI value if there are two in a row
+                bin_char = np.array(list(hexcqi_lut['CQI']))
+                output = np.append(output, [bin_char.reshape(bin_char.size, -1)])
+                next(input)
+                next(input)
+
+            char = f'CQI{nxt}' if nxt != 'C' and nxt != '\n' else 'CQI'
         bin_char = np.array(list(hexcqi_lut[char]))
-        print(char, '->', bin_char)
+        print(char, '->', bin_char) if verbose else None
         output = np.append(output, [bin_char.reshape(bin_char.size, -1)])
 
     return np.array([output]).flatten().astype(int)
@@ -78,16 +84,16 @@ def decode_bin(bin_vect, inv_perm_matrix):
     output = ''
     perm_matrix_size = inv_perm_matrix.shape[0]
     perm_matrix_length = perm_matrix_size ** 2
-    cols_per_row = np.ceil(len(bin_vect) / perm_matrix_size).astype(int)
-    print(f'Message:\n{bin_vect}')
-    print(f'Inverse permutation matrix (n={perm_matrix_size}):\n{inv_perm_matrix}')
+
+    print(f'Inverse permutation matrix (n={perm_matrix_size}):\n{inv_perm_matrix}') if verbose else None
 
     # pad bin_vect with zeros if necessary
     if len(bin_vect) % perm_matrix_length != 0:
-        print(f'Padding message from length {len(bin_vect)} to length ', flush=True, end='')
+        print(f'Padding message from length {len(bin_vect)} to length ', flush=True, end='') if verbose else None
         bin_vect = np.append(bin_vect, np.zeros(perm_matrix_length - len(bin_vect) % perm_matrix_length))
-        print(len(bin_vect))
-    print(bin_vect)
+        print(len(bin_vect)) if verbose else None
+
+    print(f'Message:\n{bin_vect}') if verbose else None
 
     # iterate over bin_vect in chunks of perm_matrix_size
     for i in range(0, len(bin_vect), perm_matrix_length):
@@ -102,21 +108,22 @@ def parse_binary_to_ascii(bin_vect):
     """
     parse binary vector into ascii characters
     """
-    # bin_vect = bin_vect.reshape(-1, 8)
     chunks = [bin_vect[i:i + 8] for i in range(0, len(bin_vect), 8)]
 
-    # Convert each chunk to decimal, and then to ASCII
-    ascii_str = ''.join([chr(int(chunk, 2)) for chunk in chunks])
-    print(f'ASCII Output:\n{ascii_str}')
-    return ascii_str
-
+    # Convert each chunk to decimal, and then to ASCII in utf-8 encoding
+    ascii_output = ''.join([chr(int(chunk, 2)) for chunk in chunks])
+    print(f'ASCII Output:\n{ascii_output}') if verbose else None
+    return ascii_output
 
 def iterate_lines(input_file):
-    for line in input_file:
-        inv_perm_matrix, hex_cqi = parse_line(line)
-        bin_vect = parse_hex_cqi(hex_cqi)
-        decoded_bin = decode_bin(bin_vect, inv_perm_matrix)
-        parse_binary_to_ascii(decoded_bin)
+    with open('out.txt', 'a') as f:
+        for line in input_file:
+            inv_perm_matrix, hex_cqi = parse_line(line)
+            bin_vect = parse_hex_cqi(hex_cqi)
+            decoded_bin = decode_bin(bin_vect, inv_perm_matrix)
+            output = parse_binary_to_ascii(decoded_bin)
+            # write output to file
+            f.write(f'{output}\n')
 
 
 def test_case():
@@ -128,7 +135,8 @@ def test_case():
 
 
 if __name__ == '__main__':
-    test = True
+    test = False
+    verbose = False
     create_hexcqi_lut()
 
     if test:
