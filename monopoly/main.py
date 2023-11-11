@@ -88,7 +88,6 @@ def calculate_rounds(player):
     properties = players[player]['properties']
     if not properties:  # if the player has no properties return 0 ( we assume they havent gone around the board)
         return 0
-    # properties.sort()
     current_position = players[player]['end_position']
     rounds = 0
     for i in range(1, len(properties)):
