@@ -100,4 +100,3 @@ if __name__ == "__main__":
     a_star()
 
     f.close()
-
