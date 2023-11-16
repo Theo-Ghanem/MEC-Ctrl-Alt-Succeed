@@ -100,7 +100,9 @@ def decode_bin(bin_vect, inv_perm_matrix):
         message = bin_vect[i:i + perm_matrix_length].reshape(perm_matrix_size, perm_matrix_size).astype(int)
         chunk = inv_perm_matrix.dot(message).astype(int)
         output += ''.join(chunk.flatten().astype(str))
-    print(f'Binary Output:\n{output}')
+    print(f'Binary Output:\n{output}') if verbose else None
+
+    
     return output
 
 
